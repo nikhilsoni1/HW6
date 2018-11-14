@@ -45,3 +45,5 @@ HW6_files/
 *.pdf
 *.log
 .DS_Store
+input/
+output/
