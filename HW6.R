@@ -25,3 +25,5 @@ wp.freq<-t(as.matrix(table(wp)))
 
 barplot(wp.freq, main="Histogram of frequency")
 shannon_entropy(wp)
+T.mat<-table(wp[1:length(wp)-1],wp[2:length(wp)])
+heatmap(T.mat)
