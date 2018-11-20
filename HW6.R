@@ -42,9 +42,9 @@ MHalgo<-function(T.mat, X, perm, run=3000, verbose=F)
     CTR<-CTR+1
     if((CTR %% 100)==0 && verbose)
     {
+      print(CTR)
       if(FLAG)
       {
-        print(CTR)
         print(paste(acc$new_msg[1:20], collapse = ''))
       }
       else
@@ -62,7 +62,7 @@ likelihood<-function(T.mat, X, perm)
   Y<-list()
   for(i in 1:length(X))
   {
-    Y<-c(Y,unlist(perm[X[i]]))
+    Y<-c(Y,unlist(perm[[X[i]]]))
   }
   X<-unlist(Y)
   diff<-setdiff(symbol, X)
@@ -104,4 +104,4 @@ perm<-setNames(as.list(symbol), symbol)
 barplot(wp.freq, main="Histogram of frequency")
 shannon_entropy(wp)
 heatmap(T.mat, Colv = NA, Rowv = NA, scale = "column")
-
+MHalgo(T.mat, msg, perm, verbose=T)
