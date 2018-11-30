@@ -45,7 +45,7 @@ encode<-function(K, msg, iter=1000)
   a<-char_map(K, msg)
   return(list(perm=K, msg=a, orig=msg))
 }
-MHalgo<-function(T.mat, X, perm, run=3000, verbose=F, B=2000)
+MHalgo<-function(T.mat, X, perm, run=5000, verbose=F, B=2000)
 {
   run<-run+B
   CTR<-1
@@ -92,7 +92,7 @@ MHalgo<-function(T.mat, X, perm, run=3000, verbose=F, B=2000)
     }
     CTR<-CTR+1
   }
-  return(MSG)
+  return(paste(MSG, collapse = ""))
 }
 likelihood<-function(T.mat, X, perm)
 {
