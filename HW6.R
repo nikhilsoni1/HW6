@@ -45,40 +45,54 @@ encode<-function(K, msg, iter=1000)
   a<-char_map(K, msg)
   return(list(perm=K, msg=a, orig=msg))
 }
-MHalgo<-function(T.mat, X, perm, run=3000, verbose=F, B=1000)
+MHalgo<-function(T.mat, X, perm, run=3000, verbose=F, B=2000)
 {
+  run<-run+B
   CTR<-1
+  BURNT<-F
+  MSG<-NULL
   while(CTR<=run)
   {
-    FLAG<-F
-    acc<-acceptance(T.mat, X, perm)
-    if(CTR>B)
+    if(BURNT)
     {
-      CTR<-1
-      if(acc$acc<1)
+      acc<-acceptance(T.mat, X, perm)
+      U<-runif(1)
+      if(acc$acc != 1)
       {
-        perm = acc$old_perm
-        FLAG<-T
+        perm<-acc$new_perm
+        MSG<-acc$new_msg
       }
-      if((CTR %% 100)==0 && verbose)
+      else
       {
-        print(CTR)
-        if(FLAG)
-        {
-          print(paste(acc$old_msg[1:20], collapse = ''))
-        }
-        else
-        {
-          print(paste(acc$new_msg[1:20], collapse = ''))
-        }
+        perm<-acc$old_perm
+        MSG<-acc$old_msg
+      }
+      if((CTR %% 100) == 0 && verbose)
+      {
+        print(CTR-B)
+        print(paste(MSG[1:20], collapse = ''))
       }
     }
     else
     {
-      perm<-acc$new_perm
+      acc<-acceptance(T.mat, X, perm)
+      U<-runif(1)
+      if(acc$acc !=1)
+      {
+        perm<-acc$new_perm
+      }
+      else
+      {
+        perm<-acc$old_perm
+      }
+    }
+    if(CTR==B)
+    {
+      BURNT<-T
     }
     CTR<-CTR+1
   }
+  return(MSG)
 }
 likelihood<-function(T.mat, X, perm)
 {
@@ -125,4 +139,4 @@ perm<-setNames(as.list(symbol), symbol)
 barplot(wp.freq, main="Histogram of frequency")
 shannon_entropy(wp)
 heatmap(T.mat, Colv = NA, Rowv = NA, scale = "column")
-MHalgo(T.mat, msg, perm, verbose=T, run=10000)
+msg.decoded<-MHalgo(T.mat, msg, perm, verbose=T)
