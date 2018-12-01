@@ -242,9 +242,10 @@ encode<-function(K, msg, iter=1000)
 ```
 
 ```{r}
-iid.opt<-F # Set the IID option as false
-result<-MHalgo(T.mat, msg, perm, verbose=T)
-plot(result$likelihood, type="l", ylab="Log Likelihood", xlab="Iterations", main="Evolution of Likelihood")
+# set.seed(909)
+# iid.opt<-F
+# result<-MHalgo(T.mat, msg, perm, verbose=T)
+# plot(result$likelihood, type="l", ylab="Log Likelihood", xlab="Iterations", main="Evolution of Likelihood")
 ```
 
 **Runs:     5000**
@@ -275,6 +276,7 @@ It got wrong:
 #### Q10.)
 
 ```{r}
+set.seed(3)
 iid.opt<-T # Set the IID option as true
 result.iid<-MHalgo(T.mat, msg, perm, verbose=T)
 ```
