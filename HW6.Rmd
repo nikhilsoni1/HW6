@@ -14,29 +14,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Problem 2
 
-### Processing the english language corpus and running the algorithm takes significant amount of time. Hence, the computationally intensive and time taking parts of code are commented out. RData is used to present the results. However, all the necessary assets to run this code has been provided, should you want to check the code for efficacy.
-
-```{r}
-load("HW6.RData")
-```
 
 #### Q1.) 30!
 
 #### Q2.) 
 
 ```{r}
-# This part of code has dependencies with respect to files, make sure the input folder 
-# is included in the submission 
-# exists in the working directory. Only then uncomment the code.
-
-# msg<-readChar("input/message.txt", file.info("input/message.txt")$size)
-# wp<-readChar("input/wp.txt", file.info("input/wp.txt")$size)
-# wp<-gsub("\r", "", wp)
-# wp<-gsub("\n", " ", wp)
-# wp<-gsub("\\s{2,100}", " ", wp)
-# wp<-tolower(wp)
-# wp<-gsub("[^a-z\\,\\.\\: ]", "", wp)
-# wp<-unlist(strsplit(wp, ""))
+msg<-readChar("input/message.txt", file.info("input/message.txt")$size)
+wp<-readChar("input/wp.txt", file.info("input/wp.txt")$size)
+wp<-gsub("\r", "", wp)
+wp<-gsub("\n", " ", wp)
+wp<-gsub("\\s{2,100}", " ", wp)
+wp<-tolower(wp)
+wp<-gsub("[^a-z\\,\\.\\: ]", "", wp)
+wp<-unlist(strsplit(wp, ""))
 wp.freq<-t(as.matrix(table(wp)))
 
 # Entropy Function
@@ -226,8 +217,6 @@ acceptance<-function(T.mat, X, perm)
   rand_perm<-random_perm(perm)
   a<-likelihood(T.mat, X, rand_perm)
   b<-likelihood(T.mat, X, perm)
-  print(a$ll)
-  print(b$ll)
   acc<-min(1, (a$ll/b$ll))
   return(list(new_perm=rand_perm, new_msg=a$msg, old_msg=b$msg, old_perm=perm, acc=acc))
 }
