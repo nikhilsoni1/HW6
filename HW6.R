@@ -164,7 +164,6 @@ barplot(wp.freq, main="Histogram of frequency")
 shannon_entropy(wp)
 heatmap(T.mat, Colv = NA, Rowv = NA, scale = "column")
 iid.opt<-F
-temp<-MHalgo(T.mat, msg, perm, verbose=T)
 result<-MHalgo(T.mat, msg, perm, verbose=T)
 iid.opt<-T
 result.iid<-MHalgo(T.mat, msg, perm, verbose=T)

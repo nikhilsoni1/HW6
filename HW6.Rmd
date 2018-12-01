@@ -1,0 +1,12 @@
+---
+title: "HW6"
+author: "Nikhil Soni"
+date: "11/30/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Processing the english language corpus and running the algorithm takes significant amount of time. Hence, the computationally intensive and time taking parts of code are commented out. RData is used to present the results. However, all the necessary assets to run this code has been provided, should you want to check the code for efficacy.
