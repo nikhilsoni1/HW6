@@ -1,0 +1,291 @@
+---
+title: "HW6"
+author: "Nikhil Soni"
+date: "11/30/2018"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Problem 2
+
+
+#### Q1.) 30!
+
+#### Q2.) 
+
+```{r}
+msg<-readChar("input/message.txt", file.info("input/message.txt")$size)
+wp<-readChar("input/wp.txt", file.info("input/wp.txt")$size)
+wp<-gsub("\r", "", wp)
+wp<-gsub("\n", " ", wp)
+wp<-gsub("\\s{2,100}", " ", wp)
+wp<-tolower(wp)
+wp<-gsub("[^a-z\\,\\.\\: ]", "", wp)
+wp<-unlist(strsplit(wp, ""))
+wp.freq<-t(as.matrix(table(wp)))
+
+# Entropy Function
+shannon_entropy<-function(vec)
+{
+  freqs<-table(vec)/length(vec)
+  return(-sum(freqs * log2(freqs)))
+}
+
+barplot(wp.freq, main="Histogram of Frequency")
+```
+
+```{r, include=FALSE}
+symbol<-sort(unique(wp))
+perm<-setNames(as.list(symbol), symbol)
+```
+
+
+Entropy of the distribution:
+
+```{r}
+shannon_entropy(wp)
+```
+\newpage
+
+#### Q4.)
+
+```{r}
+T.mat<-unclass(table(wp[1:length(wp)-1],wp[2:length(wp)]))
+T.mat[T.mat==0]<-1e-03
+T.mat<-t(apply(T.mat, 1, function(x) x/sum(x)))
+
+heatmap(T.mat, Colv = NA, Rowv = NA, scale = "column")
+```
+
+Smallest Entropy
+
+```{r}
+T.mat.max<-which(T.mat == max(T.mat), arr.ind = TRUE)
+rownames(T.mat)[T.mat.max[2]]
+rownames(T.mat)[T.mat.max[1]]
+rm(T.mat.max)
+```
+
+Largest Entropy
+
+```{r}
+T.mat.min<-which(T.mat == min(T.mat), arr.ind = TRUE)
+rownames(T.mat)[T.mat.min[2]]
+rownames(T.mat)[T.mat.min[1]]
+rm(T.mat.min)
+```
+
+\newpage
+
+#### Q5.)
+
+```{r}
+likelihood<-function(T.mat, X, perm)
+{
+  
+  X<-gsub("\n", "", X)
+  X<-unlist(strsplit(X, ""))
+  X<-decode(perm, X)
+  diff<-setdiff(symbol, X)
+  freq.X<-as.matrix(table(X[1:length(X)-1],X[2:length(X)]))
+  rn<-rownames(freq.X)
+  rn<-c(rn, diff)
+  cn<-colnames(freq.X)
+  cn<-c(cn, diff)
+  for(i in 1: length(diff))
+  {
+    freq.X<-rbind(freq.X, 0)
+    freq.X<-cbind(freq.X, 0)
+  }
+  colnames(freq.X)<-cn
+  rownames(freq.X)<-rn
+  freq.X<-freq.X[,colnames(T.mat)]
+  freq.X<-freq.X[rownames(T.mat),]
+  freq.X[freq.X<0]<-1e-03
+  transition.matrix.result<-list(ll=sum(freq.X * log(T.mat)), msg=X)
+  if(iid.opt)
+  {
+    freq<-wp.freq
+    P<-freq/sum(freq)
+    P<-t(P) %*% P
+    # P<-log(P)
+    freq.X<-freq.X[,colnames(P)]
+    freq.X<-freq.X[rownames(P),]
+    iid_ll<-sum(freq.X * log(P))
+    return(list(ll=iid_ll, msg=X))
+  }
+  else
+  {
+    return(transition.matrix.result)
+  }
+}
+```
+
+\newpage
+
+#### Q6.)
+
+Because there can be 30! bijective function which is computationally expensive. Independent sampling is generally impractical in higher dimensions as evident from this example. Hence, we use Metropolis-Hastings algorithm which uses Markov Chain to find samples from the current distribution.
+
+#### Q7.)
+
+$$q(\sigma)=Unif(0,1)$$
+
+$$\alpha=min(1,\frac{P_{Eng}(\sigma_{new}^{-1}(X)|T)}{P_{Eng}(\sigma_{old}^{-1}(X)|T)})$$
+
+\newpage
+
+#### Q8.)
+
+```{r}
+MHalgo<-function(T.mat, X, perm, run=5000, verbose=F, B=2000)
+{
+  run<-run+B
+  CTR<-1
+  BURNT<-F
+  MSG<-NULL
+  lh<-list()
+  perm.list<-list()
+  while(CTR<=run)
+  {
+    if(BURNT)
+    {
+      acc<-acceptance(T.mat, X, perm)
+      U<-runif(1)
+      if(acc$acc != 1)
+      {
+        perm<-acc$new_perm
+        MSG<-acc$new_msg
+        lh<-c(lh, likelihood(T.mat, X, perm)$ll)
+      }
+      else
+      {
+        perm<-acc$old_perm
+        MSG<-acc$old_msg
+        lh<-c(lh, likelihood(T.mat, X, perm)$ll)
+      }
+      perm.list[[CTR-B]]<-perm
+      if((CTR %% 100) == 0 && verbose)
+      {
+        print(CTR-B)
+        print(paste(MSG[1:20], collapse = ''))
+      }
+    }
+    else
+    {
+      acc<-acceptance(T.mat, X, perm)
+      U<-runif(1)
+      if(acc$acc !=1)
+      {
+        perm<-acc$new_perm
+      }
+      else
+      {
+        perm<-acc$old_perm
+      }
+    }
+    if(CTR==B)
+    {
+      BURNT<-T
+    }
+    CTR<-CTR+1
+  }
+  lh<-unlist(lh)
+  MSG<-paste(MSG, collapse = "")
+  return(list(message=MSG, likelihood=lh, permutations=perm.list))
+}
+```
+
+```{r, include=FALSE}
+# Helper Functions
+random_perm<-function(x, sym = symbol)
+{
+  s<-sample(sym, 2)
+  temp<-x[s[1]]
+  x[s[1]]<-x[s[2]]
+  x[s[2]]<-temp
+  return(x)
+}
+acceptance<-function(T.mat, X, perm)
+{
+  rand_perm<-random_perm(perm)
+  a<-likelihood(T.mat, X, rand_perm)
+  b<-likelihood(T.mat, X, perm)
+  acc<-min(1, (a$ll/b$ll))
+  return(list(new_perm=rand_perm, new_msg=a$msg, old_msg=b$msg, old_perm=perm, acc=acc))
+}
+decode<-function(K, msg)
+{
+  Y<-list()
+  for(i in 1:length(msg))
+  {
+    Y<-c(Y,unlist(K[[msg[i]]]))
+  }
+  return(unlist(Y))
+}
+encode<-function(K, msg, iter=1000)
+{
+  for(i in 1:iter)
+  {
+    K<-random_perm(K)
+  }
+  msg<-unlist(strsplit(msg, ""))
+  a<-char_map(K, msg)
+  return(list(perm=K, msg=a, orig=msg))
+}
+```
+
+```{r}
+# set.seed(909)
+# iid.opt<-F
+# result<-MHalgo(T.mat, msg, perm, verbose=T)
+# plot(result$likelihood, type="l", ylab="Log Likelihood", xlab="Iterations", main="Evolution of Likelihood")
+```
+
+**Runs:     5000**
+
+**Burn-In:  2000**
+
+\newpage
+
+####  Q9.)
+
+Highest Uncertainty:
+
+  * "y"
+  * "k"
+
+Lowest Uncertainty:
+
+  * " "
+  
+It got wrong:
+
+  * "." instead of "k""
+  * "k" instead of "y"
+  * "y" instead of "s"
+
+\newpage
+
+#### Q10.)
+
+```{r}
+set.seed(3)
+iid.opt<-T # Set the IID option as true
+result.iid<-MHalgo(T.mat, msg, perm, verbose=T)
+```
+
+
+It works but the decoding depends on random swapping of permutations.
+
+\newpage
+
+#### Q11.)
+
+Higher-order Markov models for decoding will give higher quality results which will have lower misclassification. However, fesibility will decrease as the order of MC increases because calculating a transition matrix for such a case will be complicated because of higer dimensions of the transition matrix.

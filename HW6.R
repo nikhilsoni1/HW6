@@ -24,8 +24,6 @@ acceptance<-function(T.mat, X, perm)
   rand_perm<-random_perm(perm)
   a<-likelihood(T.mat, X, rand_perm)
   b<-likelihood(T.mat, X, perm)
-  print(a$ll)
-  print(b$ll)
   acc<-min(1, (a$ll/b$ll))
   return(list(new_perm=rand_perm, new_msg=a$msg, old_msg=b$msg, old_perm=perm, acc=acc))
 }
@@ -165,7 +163,6 @@ barplot(wp.freq, main="Histogram of frequency")
 shannon_entropy(wp)
 heatmap(T.mat, Colv = NA, Rowv = NA, scale = "column")
 iid.opt<-F
-temp<-MHalgo(T.mat, msg, perm, verbose=T)
 result<-MHalgo(T.mat, msg, perm, verbose=T)
 iid.opt<-T
 result.iid<-MHalgo(T.mat, msg, perm, verbose=T)
