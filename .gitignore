@@ -47,3 +47,6 @@ HW6_files/
 .DS_Store
 input/
 output/
+submission/
+*.zip
+assets/

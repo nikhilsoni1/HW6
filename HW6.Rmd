@@ -241,11 +241,11 @@ encode<-function(K, msg, iter=1000)
 }
 ```
 
-```{r}
-# set.seed(909)
-# iid.opt<-F
-# result<-MHalgo(T.mat, msg, perm, verbose=T)
-# plot(result$likelihood, type="l", ylab="Log Likelihood", xlab="Iterations", main="Evolution of Likelihood")
+```{r cache=TRUE}
+set.seed(909)
+iid.opt<-F
+result<-MHalgo(T.mat, msg, perm, verbose=T)
+plot(result$likelihood, type="l", ylab="Log Likelihood", xlab="Iterations", main="Evolution of Likelihood")
 ```
 
 **Runs:     5000**
@@ -275,14 +275,19 @@ It got wrong:
 
 #### Q10.)
 
-```{r}
-set.seed(3)
+```{r cache=TRUE}
+rm(iid.opt)
+set.seed(100)
 iid.opt<-T # Set the IID option as true
 result.iid<-MHalgo(T.mat, msg, perm, verbose=T)
 ```
 
 
 It works but the decoding depends on random swapping of permutations.
+
+**When running the code from the chunk, the output is as follows. This is drastically different from the knitted result, which doesnt change at all. It is an issue with R and how it handles RMarkdown chunks**
+
+![Chunk Output](assets/iid.png)
 
 \newpage
 
